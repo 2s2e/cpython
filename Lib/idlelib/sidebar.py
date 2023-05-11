@@ -338,11 +338,15 @@ class LineNumbers(BaseSideBar):
         if end == self.prev_end:
             return
 
+        #print(end)
+
+        #updating the width of the sidebar_text
         width_difference = len(str(end)) - len(str(self.prev_end))
         if width_difference:
             cur_width = int(float(self.sidebar_text['width']))
             new_width = cur_width + width_difference
             self.sidebar_text['width'] = self._sidebar_width_type(new_width)
+
 
         with temp_enable_text_widget(self.sidebar_text):
             if end > self.prev_end:
@@ -407,7 +411,7 @@ class ShellSidebar(BaseSideBar):
     def __init__(self, editwin):
         self.canvas = None
         self.line_prompts = {}
-        self.arrows = 'Speak, forthwith!'
+        self.arrows = 'Prithee, speak!'
 
         super().__init__(editwin)
 
@@ -499,7 +503,7 @@ class ShellSidebar(BaseSideBar):
         """Update the sidebar text font, usually after config changes."""
         font = idleConf.GetFont(self.text, 'main', 'EditorWindow')
         tk_font = Font(self.text, font=font)
-        char_width = max(tk_font.measure(char) for char in ['>', '.'])
+        char_width = max(tk_font.measure(char) for char in self.arrows)
         #sidebar width 
         self.canvas.configure(width=char_width * len(self.arrows) + 4)
         self.font = font

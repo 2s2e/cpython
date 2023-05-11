@@ -5,6 +5,7 @@ import platform
 import re
 import string
 import sys
+import tkinter
 import tokenize
 import traceback
 import webbrowser
@@ -692,11 +693,24 @@ class EditorWindow:
 
     def goto_line_event(self, event):
         text = self.text
+        firstlinenumber = text.index("1.0").split(".")[0]
+        lastlinenumber = text.index("end-1c").split(".")[0]
         lineno = query.Goto(
                 text, "Go To Line",
                 "Enter a positive integer\n"
-                "('big' = end of file):"
+                "between %s and %s:" % (firstlinenumber, lastlinenumber),
                 ).result
+        
+        if int(lineno) == 0 or int(lineno) > int(lastlinenumber):
+            tkinter.messagebox.showerror(message='Please enter a number between 1 and ' + lastlinenumber)
+            return
+        elif int(lineno) < 0:
+            lineno = int(lastlinenumber) + int(lineno) + 1
+            if lineno < 1:
+                tkinter.messagebox.showerror(message='Please enter a number between -' + lastlinenumber + 'and  -1')
+                return
+            lineno = string(lineno)
+
         if lineno is not None:
             text.tag_remove("sel", "1.0", "end")
             text.mark_set("insert", f'{lineno}.0')
