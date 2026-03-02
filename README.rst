@@ -1,6 +1,8 @@
 This is Python version 3.15.0 alpha 6
 =====================================
 
+.. note:: Test change for PR demonstration.
+
 .. image:: https://github.com/python/cpython/actions/workflows/build.yml/badge.svg?branch=main&event=push
    :alt: CPython build status on GitHub Actions
    :target: https://github.com/python/cpython/actions
