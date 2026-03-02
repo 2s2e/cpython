@@ -227,19 +227,38 @@ class ModuleName(Query):
 
 
 class Goto(Query):
-    "Get a positive line number for editor Go To Line."
+    "Get a line number for editor Go To Line."
     # Used in editor.EditorWindow.goto_line_event.
 
+    def __init__(self, parent, title, message, num_lines,
+                 *, _htest=False, _utest=False):
+        self.num_lines = num_lines
+        super().__init__(parent, title, message,
+                         _htest=_htest, _utest=_utest)
+
     def entry_ok(self):
+        "Return a valid line number (converting negatives) or None."
         try:
             lineno = int(self.entry.get())
         except ValueError:
             self.showerror('not a base 10 integer.')
             return None
-        if lineno <= 0:
-            self.showerror('not a positive integer.')
+        if lineno == 0:
+            self.showerror('0 is not a valid line number.')
             return None
-        return lineno
+        if lineno > 0:
+            if lineno > self.num_lines:
+                self.showerror(
+                    f'Enter a number between 1 and {self.num_lines}, inclusive.')
+                return None
+            return lineno
+        else:  # negative: -1 means last line, -2 second to last, etc.
+            if lineno < -self.num_lines:
+                self.showerror(
+                    f'Negative entries must be between -{self.num_lines}'
+                    f' and -1, inclusive.')
+                return None
+            return self.num_lines + lineno + 1
 
 
 class HelpSource(Query):

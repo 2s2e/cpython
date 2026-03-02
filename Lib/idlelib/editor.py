@@ -681,10 +681,14 @@ class EditorWindow:
 
     def goto_line_event(self, event):
         text = self.text
+        num_lines = int(text.index('end').split('.')[0]) - 1
+        current_line = int(text.index('insert').split('.')[0])
         lineno = query.Goto(
                 text, "Go To Line",
-                "Enter a positive integer\n"
-                "('big' = end of file):"
+                f"Current line: {current_line}\n"
+                f"Enter a line number (1 to {num_lines}"
+                f" or -{num_lines} to -1):",
+                num_lines
                 ).result
         if lineno is not None:
             text.tag_remove("sel", "1.0", "end")
