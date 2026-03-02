@@ -406,7 +406,7 @@ class ShellSidebar(BaseSideBar):
     def __init__(self, editwin):
         self.canvas = None
         self.line_prompts = {}
-        self.arrows = 'Speak, forthwith!'
+        self.arrows = '>>>'
 
         super().__init__(editwin)
 
@@ -475,7 +475,7 @@ class ShellSidebar(BaseSideBar):
             y = lineinfo[1]
             prev_newline_tagnames = text_tagnames(f"{index} linestart -1c")
             prompt = (
-                self.arrows if "console" in prev_newline_tagnames else
+                '>>>>>>' if "console" in prev_newline_tagnames else
                 '...' if "stdin" in prev_newline_tagnames else
                 None
             )
@@ -500,7 +500,7 @@ class ShellSidebar(BaseSideBar):
         tk_font = Font(self.text, font=font)
         char_width = max(tk_font.measure(char) for char in ['>', '.'])
         #sidebar width 
-        self.canvas.configure(width=char_width * len(self.arrows) + 4)
+        self.canvas.configure(width=char_width * 6 + 4)
         self.font = font
         self.change_callback()
 
