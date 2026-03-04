@@ -144,28 +144,48 @@ class ModuleNameTest(unittest.TestCase):
 class GotoTest(unittest.TestCase):
     "Test Goto subclass of Query."
 
-    class Dummy_ModuleName:
+    class Dummy_Goto:
         entry_ok = query.Goto.entry_ok  # Function being tested.
-        def __init__(self, dummy_entry):
+        def __init__(self, dummy_entry, line_count=100):
+            self.line_count = line_count
             self.entry = Var(value=dummy_entry)
             self.entry_error = {'text': ''}
         def showerror(self, message):
             self.entry_error['text'] = message
 
     def test_bogus_goto(self):
-        dialog = self.Dummy_ModuleName('a')
+        dialog = self.Dummy_Goto('a')
         self.assertEqual(dialog.entry_ok(), None)
         self.assertIn('not a base 10 integer', dialog.entry_error['text'])
 
-    def test_bad_goto(self):
-        dialog = self.Dummy_ModuleName('0')
+    def test_zero_goto(self):
+        dialog = self.Dummy_Goto('0')
         self.assertEqual(dialog.entry_ok(), None)
-        self.assertIn('not a positive integer', dialog.entry_error['text'])
+        self.assertIn('Enter a number between 1 and', dialog.entry_error['text'])
+
+    def test_too_large_goto(self):
+        dialog = self.Dummy_Goto('101', line_count=100)
+        self.assertEqual(dialog.entry_ok(), None)
+        self.assertIn('Enter a number between 1 and 100', dialog.entry_error['text'])
 
     def test_good_goto(self):
-        dialog = self.Dummy_ModuleName('1')
+        dialog = self.Dummy_Goto('1')
         self.assertEqual(dialog.entry_ok(), 1)
         self.assertEqual(dialog.entry_error['text'], '')
+
+    def test_negative_goto(self):
+        dialog = self.Dummy_Goto('-1', line_count=100)
+        self.assertEqual(dialog.entry_ok(), 100)
+
+    def test_negative_goto_middle(self):
+        dialog = self.Dummy_Goto('-2', line_count=100)
+        self.assertEqual(dialog.entry_ok(), 99)
+
+    def test_too_negative_goto(self):
+        dialog = self.Dummy_Goto('-101', line_count=100)
+        self.assertEqual(dialog.entry_ok(), None)
+        self.assertIn('Negative entries must be between -100 and -1',
+                      dialog.entry_error['text'])
 
 
 # 3 HelpSource test classes each test one method.
@@ -402,7 +422,8 @@ class GotoGuiTest(unittest.TestCase):
     def test_click_module_name(self):
         root = Tk()
         root.withdraw()
-        dialog =  query.Goto(root, 'T', 't', _utest=True)
+        dialog = query.Goto(root, 'T', line_count=100, current_line=1,
+                            _utest=True)
         dialog.entry.insert(0, '22')
         dialog.button_ok.invoke()
         self.assertEqual(dialog.result, 22)
