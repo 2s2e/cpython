@@ -227,8 +227,15 @@ class ModuleName(Query):
 
 
 class Goto(Query):
-    "Get a positive line number for editor Go To Line."
+    "Get a line number for editor Go To Line, supporting negative indexing."
     # Used in editor.EditorWindow.goto_line_event.
+
+    def __init__(self, parent, title, message, *, num_lines, current_line,
+                 _htest=False, _utest=False):
+        self.num_lines = num_lines
+        self.current_line = current_line
+        super().__init__(parent, title, message,
+                         _htest=_htest, _utest=_utest)
 
     def entry_ok(self):
         try:
@@ -236,9 +243,16 @@ class Goto(Query):
         except ValueError:
             self.showerror('not a base 10 integer.')
             return None
-        if lineno <= 0:
-            self.showerror('not a positive integer.')
+        if lineno == 0 or lineno > self.num_lines:
+            self.showerror(
+                f'Enter a number between 1 and {self.num_lines}, inclusive.')
             return None
+        if lineno < -self.num_lines:
+            self.showerror(
+                f'Negative entries must be between -{self.num_lines} and -1, inclusive.')
+            return None
+        if lineno < 0:
+            lineno = self.num_lines + lineno + 1
         return lineno
 
 
