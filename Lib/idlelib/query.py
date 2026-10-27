@@ -228,8 +228,18 @@ class ModuleName(Query):
 
 
 class Goto(Query):
-    "Get a positive line number for editor Go To Line."
+    """Get a line number for editor Go To Line.
+
+    If maxline is given, entries must be between 1 and maxline, or
+    between -maxline and -1 to count back from the last line.
+    """
     # Used in editor.EditorWindow.goto_line_event.
+
+    def __init__(self, parent, title, message, *, maxline=None,
+                 _htest=False, _utest=False):
+        self.maxline = maxline
+        super().__init__(parent, title, message,
+                         _htest=_htest, _utest=_utest)
 
     def entry_ok(self):
         try:
@@ -237,8 +247,20 @@ class Goto(Query):
         except ValueError:
             self.showerror('not a base 10 integer.')
             return None
+        maxline = self.maxline
+        if maxline is not None and lineno < 0:
+            if lineno < -maxline:
+                self.entry_error['text'] = (
+                    f'Negative entries must be between -{maxline} and -1, '
+                    'inclusive')
+                return None
+            return maxline + lineno + 1
         if lineno <= 0:
             self.showerror('not a positive integer.')
+            return None
+        if maxline is not None and lineno > maxline:
+            self.entry_error['text'] = (
+                f'Enter a number between 1 and {maxline}, inclusive')
             return None
         return lineno
 

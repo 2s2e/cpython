@@ -146,8 +146,9 @@ class GotoTest(unittest.TestCase):
 
     class Dummy_ModuleName:
         entry_ok = query.Goto.entry_ok  # Function being tested.
-        def __init__(self, dummy_entry):
+        def __init__(self, dummy_entry, maxline=None):
             self.entry = Var(value=dummy_entry)
+            self.maxline = maxline
             self.entry_error = {'text': ''}
         def showerror(self, message):
             self.entry_error['text'] = message
@@ -166,6 +167,30 @@ class GotoTest(unittest.TestCase):
         dialog = self.Dummy_ModuleName('1')
         self.assertEqual(dialog.entry_ok(), 1)
         self.assertEqual(dialog.entry_error['text'], '')
+
+    def test_maxline_goto(self):
+        for entry, expect in ('1', 1), ('10', 10), ('-1', 10), ('-10', 1):
+            with self.subTest(entry=entry):
+                dialog = self.Dummy_ModuleName(entry, maxline=10)
+                self.assertEqual(dialog.entry_ok(), expect)
+                self.assertEqual(dialog.entry_error['text'], '')
+
+    def test_too_big_goto(self):
+        dialog = self.Dummy_ModuleName('11', maxline=10)
+        self.assertEqual(dialog.entry_ok(), None)
+        self.assertEqual(dialog.entry_error['text'],
+                         'Enter a number between 1 and 10, inclusive')
+
+    def test_too_negative_goto(self):
+        dialog = self.Dummy_ModuleName('-11', maxline=10)
+        self.assertEqual(dialog.entry_ok(), None)
+        self.assertEqual(dialog.entry_error['text'],
+                         'Negative entries must be between -10 and -1, inclusive')
+
+    def test_zero_goto_maxline(self):
+        dialog = self.Dummy_ModuleName('0', maxline=10)
+        self.assertEqual(dialog.entry_ok(), None)
+        self.assertIn('not a positive integer', dialog.entry_error['text'])
 
 
 # 3 HelpSource test classes each test one method.
