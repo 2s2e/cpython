@@ -686,10 +686,14 @@ class EditorWindow:
 
     def goto_line_event(self, event):
         text = self.text
+        curline = int(text.index("insert").split(".")[0])
+        maxline = int(text.index("end-1c").split(".")[0])
         lineno = query.Goto(
                 text, "Go To Line",
-                "Enter a positive integer\n"
-                "('big' = end of file):"
+                f"Current line: {curline}\n"
+                f"Enter a number between 1 and {maxline},\n"
+                f"or between -{maxline} and -1 to count from the end:",
+                maxline=maxline,
                 ).result
         if lineno is not None:
             text.tag_remove("sel", "1.0", "end")
